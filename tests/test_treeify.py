@@ -1,5 +1,6 @@
 import unittest
-from treeify.treeify import Treeify, BadNodeError
+from treeify import Treeify, BadNodeError
+from treeify.adapters import DictAdapter, FnAdapter
 
 
 class Branch(object):
@@ -24,9 +25,17 @@ class BadLeaf(object):
         self._bar = None
 
 
+class FnBranch(object):
+    def __init__(self, value, children, real_children):
+        self.foo = value
+        self.children = children
+        self.real_children = real_children
+
+
 class TestTreeify(unittest.TestCase):
     def setUp(self):
-        self.treeify = Treeify('children', 'foo', 'bar')
+        self.treeify = Treeify('children', 'foo', 'bar', prefix='  ',
+                               right_prefix='  ')
 
     def test_empty(self):
         with self.assertRaises(BadNodeError):
@@ -48,6 +57,27 @@ class TestTreeify(unittest.TestCase):
                          ['foo', '  bar', '  baz'])
 
     def test_nested_case(self):
-        root = Branch('foo', [Branch('bar', [Leaf('xyzzy')]),
+        root = Branch('foo', [Branch('bar', [Leaf('quux'), Leaf('xyzzy')]),
                               Branch('baz', [Leaf('qux')])])
-        self.treeify.show_traverse(root)
+        self.assertEqual(list(self.treeify.traverse(root)),
+                         ['foo', '  bar', '    quux', '    xyzzy', '  baz',
+                          '    qux'])
+
+    def test_child_adapter_dict(self):
+        self.treeify._child_adapter = DictAdapter('real_children')
+        root = FnBranch('foo', ['bar', 'baz'], {'bar': Leaf('qux'),
+                                                'baz': Leaf('quxx')})
+        self.assertEqual(list(self.treeify.traverse(root)),
+                         ['foo', '  qux', '  quxx'])
+
+    def test_child_adapter_callable(self):
+        def inner(key):
+            if key == 'bar':
+                return Leaf('qux')
+            elif key == 'baz':
+                return Leaf('quxx')
+
+        self.treeify._child_adapter = FnAdapter('real_children')
+        root = FnBranch('foo', ['bar', 'baz'], inner)
+        self.assertEqual(list(self.treeify.traverse(root)),
+                         ['foo', '  qux', '  quxx'])
