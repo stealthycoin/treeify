@@ -1,4 +1,5 @@
 import unittest
+from tests import consume_stdout
 from treeify import Treeify, BadNodeError
 from treeify.adapters import DictAdapter, FnAdapter
 
@@ -81,3 +82,9 @@ class TestTreeify(unittest.TestCase):
         root = FnBranch('foo', ['bar', 'baz'], inner)
         self.assertEqual(list(self.treeify.traverse(root)),
                          ['foo', '  qux', '  quxx'])
+
+    def test_string_output(self):
+        root = Branch('foo', [Leaf('bar'), Leaf('baz')])
+        with consume_stdout() as output:
+            self.treeify.show_traverse(root)
+        self.assertEqual("foo\n  bar\n  baz\n", output.getvalue())
