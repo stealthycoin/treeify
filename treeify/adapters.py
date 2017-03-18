@@ -14,9 +14,6 @@ class DictAdapter(BaseAdapter):
         return hasattr(obj, self._dict_name)
 
     def adapt(self, obj, child):
-        if not self.can_use_adapter(obj):
-            raise RuntimeError('%s does not have property "%s"' %
-                               (obj, self._dict_name))
         return getattr(obj, self._dict_name)[child]
 
 
@@ -28,7 +25,4 @@ class FnAdapter(BaseAdapter):
         return hasattr(obj, self._fn_name)
 
     def adapt(self, obj, child):
-        if not self.can_use_adapter(obj):
-            raise RuntimeError('%s does not have property "%s"' %
-                               (obj, self._fn_name))
         return getattr(obj, self._fn_name)(child)

@@ -83,6 +83,12 @@ class TestTreeify(unittest.TestCase):
         self.assertEqual(list(self.treeify.traverse(root)),
                          ['foo', '  qux', '  quxx'])
 
+    def test_lower_down_bad_leaf(self):
+        root = Branch('foo', [Branch('bar', [Leaf('quux'), Leaf('xyzzy')]),
+                              Branch('baz', [BadLeaf()])])
+        with self.assertRaises(BadNodeError):
+            list(self.treeify.traverse(root))
+
     def test_string_output(self):
         root = Branch('foo', [Leaf('bar'), Leaf('baz')])
         with consume_stdout() as output:
