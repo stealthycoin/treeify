@@ -2,6 +2,7 @@ import unittest
 from tests import consume_stdout
 from treeify import Treeify, BadNodeError
 from treeify.adapters import DictAdapter, FnAdapter
+from treeify.display import TestRenderer
 
 
 class Branch(object):
@@ -35,8 +36,8 @@ class FnBranch(object):
 
 class TestTreeify(unittest.TestCase):
     def setUp(self):
-        self.treeify = Treeify('children', 'foo', 'bar', prefix='  ',
-                               right_prefix='  ')
+        self.treeify = Treeify('children', 'foo', 'bar',
+                               renderer=TestRenderer)
 
     def test_empty(self):
         with self.assertRaises(BadNodeError):

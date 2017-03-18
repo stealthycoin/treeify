@@ -1,11 +1,5 @@
 import sys
-
-
-T_BRACKET = u'\u251C'
-HORIZ_BAR = u'\u2500'
-VERT_BAR = u'\u2502'
-DEFAULT_PREFIX = VERT_BAR + u'  '
-RIGHTMOST_PREFIX = T_BRACKET + HORIZ_BAR + HORIZ_BAR
+from treeify.display import Renderer
 
 
 class BadNodeError(RuntimeError):
@@ -14,13 +8,11 @@ class BadNodeError(RuntimeError):
 
 class Treeify(object):
     def __init__(self, children_key, branch_str_key, leaf_str_key,
-                 prefix=DEFAULT_PREFIX, right_prefix=RIGHTMOST_PREFIX,
-                 child_adapter=None):
+                 renderer=Renderer, child_adapter=None):
         self._children_key = children_key
         self._branch_str_key = branch_str_key
         self._leaf_str_key = leaf_str_key
-        self._prefix = prefix
-        self._right_prefix = right_prefix
+        self._renderer = renderer()
         self._child_adapter = child_adapter
 
     def _traverse(self, obj, depth):
@@ -32,10 +24,7 @@ class Treeify(object):
         has_branch_str_key = hasattr(obj, self._branch_str_key)
         has_leaf_string_key = hasattr(obj, self._leaf_str_key)
 
-        prefix = self._prefix * (depth - 1)
-        if depth >= 1:
-            prefix += self._right_prefix
-
+        prefix = self._renderer.get_prefix(depth)
         if has_children_key and has_branch_str_key:
             # Branch node, yield name and recurse.
             children = getattr(obj, self._children_key)
