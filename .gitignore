@@ -10,3 +10,5 @@ develop-eggs
 tmp
 build
 dist
+.coverage
+cover
